@@ -1,0 +1,22 @@
+{
+    "profiles": [
+         {
+            "profileName": "Test",
+            "discordWebhook": "https://discordapp.com/api/webhooks//",
+            "email": "you@gmail.com",
+            "phoneNumber": "078444444444",
+            "phoneNumberPrefix":"+44", 
+            "firstName": "fname",
+            "lastName": "sname",
+            "address1": "46 farther street",
+            "address2": "Market Harborough",
+            "zipCode": "Le16 5TN",
+            "city": "Market Harborough",
+            "province": "Leicestershire",
+            "provinceCode":"LEC",
+            "country": "United Kingdom",
+            "countryCode": "GB",
+            "cardName": "Debit"
+        }
+    ]
+}
