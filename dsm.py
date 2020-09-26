@@ -160,17 +160,19 @@ def send_webhook(cart,url,clss, link):
             return False
     except:
         return False
-def dsm_monitor(kws, url, proxies, delay):
+def dsm_monitor(proxies):
     while True:
         try:
+            with open("dsm/product.txt","r") as r:
+                product = r.read().splitlines()
             proxy=proxy_format(random.choice(proxies))
-            res=requests.get(url, headers=headers, proxies=proxy)
+            res=requests.get(product[0], headers=headers, proxies=proxy)
             try:
                 output("Searching for product","Monitor","white")
                 longlist=res.text.split("image-repeat-1")
                 longlist.pop(0)
                 worked=False
-                kwlist=str(kws).split("/")
+                kwlist=str(product[1]).split("/")
                 for i in longlist:
                     for k in kwlist:
                         words=k.split(",")
@@ -188,11 +190,11 @@ def dsm_monitor(kws, url, proxies, delay):
                     output("Found product "+url,"Monitor","yellow")
                     return url
                 else:
-                    time.sleep(delay)
+                    time.sleep(float(product[2]))
             except:
-                time.sleep(delay)
+                time.sleep(float(product[2]))
         except:
-            output("Error searching for product/Can't find","Monitor","red")
+            output("Error searching for product/Can't find (or error in product.txt)","Monitor","red")
 
 class dsm:
     def __str__(self):
@@ -216,11 +218,7 @@ class dsm:
         self.city=data["city"]
         self.province=data["province"]
         self.mobile=data["phoneNumber"]
-        self.cardName=data["cardHolder"]
-        self.cardNumber=data["cardNumber"]
-        self.expMonth=data["cardExpireMonth"]
-        self.expYear=data["cardExpireYear"]
-        self.cvv=data["cardCVC"]
+        self.cardName=data["cardName"]
         self.size=data["size"]
     def login(self):
         for i in range(3):
@@ -402,28 +400,30 @@ class dsm:
 
     def pay(self, formkey):
         for i in range(3):
-            try:
-                output("Submitting order",self.name,"cyan")
-                data={
-                    "payment[method]": "adyen_pay_by_link",
-                    "form_key": formkey,
-                    "agreement[1]": "1"
-                }
-                res=self.sesh.post("https://shop.doverstreetmarket.com"+self.sitereg+"/checkout/onepage/saveOrder/",data=data, headers=headers, proxies=self.proxy)
-                res=self.sesh.get("https://shop.doverstreetmarket.com"+self.sitereg+"/adyen/process/redirect/", headers=headers, proxies=self.proxy)
-                url=find_code(res.text, "action=\"", 200).split("\"")[0]
-                self.finish=datetime.now()
-                if send_webhook(self.cart,url,self,True):
-                    output("Checkout link sent",self.name,"green")
-                    return
-                else:
-                    output(url,self.name,"green")
-                    return
-            except Exception as e:
-                try:
-                    if self.name == "Task 1":
-                        with open('temp.html', "a+") as r:
-                            r.write(self.name+"payment fail"+str(e))
-                except:
-                    None
-                output("Checkout Error", self.name,"red")
+            #try:
+            output("Submitting order",self.name,"cyan")
+            data={
+                "payment[method]": "adyen_pay_by_link",
+                "form_key": formkey,
+                "agreement[1]": "1"
+            }
+            res=self.sesh.post("https://shop.doverstreetmarket.com"+self.sitereg+"/checkout/onepage/saveOrder/",data=data, headers=headers, proxies=self.proxy)
+            print(res.status_code)
+            res=self.sesh.get("https://shop.doverstreetmarket.com"+self.sitereg+"/adyen/process/redirect/", headers=headers, proxies=self.proxy)
+            print(res.text)
+            url=find_code(res.text, "action=\"", 200).split("\"")[0]
+            self.finish=datetime.now()
+            if send_webhook(self.cart,url,self,True):
+                output("Checkout link sent",self.name,"green")
+                return
+            else:
+                output(url,self.name,"green")
+                return
+            # except Exception as e:
+            #     try:
+            #         if self.name == "Task 1":
+            #             with open('temp.html', "a+") as r:
+            #                 r.write(self.name+"payment fail"+str(e))
+            #     except:
+            #         None
+            #     output("Checkout Error", self.name,"red")

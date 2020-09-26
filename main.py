@@ -55,16 +55,16 @@ if option=="1" or option=="2":
             tasks_wanted.append({"size":params[0],"proxy":params[1],"account_num":params[2],"profile_name":params[3]})
     tasks=[]
     for i in tasks_wanted:
-        try:
-            profile="t"
-            for j in profiles:
-                if str(j["profileName"]) == str(i["profile_name"]):
-                    profile=dict(j)
-            if profile=="t":
-                raise
-            tasks.append(dsm({**{"account":accounts[int(i["account_num"])-1],"proxy":i["proxy"],"webhook":settings["webhook"],"anticap_key":settings["anticap"],"task":"Task "+str(len(tasks)+1),"size":i["size"]},**profile}, sitereg))
-        except:
-            output("Profile error: "+str(i["profile_name"]),"Task "+str(len(tasks)+1),"red")
+        #try:
+        profile="t"
+        for j in profiles:
+            if str(j["profileName"]) == str(i["profile_name"]):
+                profile=dict(j)
+        if profile=="t":
+            raise
+        tasks.append(dsm({**{"account":accounts[int(i["account_num"])-1],"proxy":i["proxy"],"webhook":settings["webhook"],"anticap_key":settings["anticap"],"task":"Task "+str(len(tasks)+1),"size":i["size"]},**profile}, sitereg))
+        #except:
+            #output("Profile error: "+str(i["profile_name"]),"Task "+str(len(tasks)+1),"red")
     threads=[]
     for i in tasks:
         x=threading.Thread(target=i.login, args=())
@@ -73,10 +73,8 @@ if option=="1" or option=="2":
         time.sleep(0.01)
     for i in threads:
         i.join()
-    delay=float(input("Delay: "))
-    collectionurl=input("Collection url: ")
-    kws=input("Keywords (, and /): ")
-    url=dsm_monitor(kws, collectionurl, proxies, delay)
+    delay=input("Enter to start: ")
+    url=dsm_monitor(proxies)
     threads=[]
     stagger_delay='%.2f'%(delay/len(tasks))
     for i in tasks:
