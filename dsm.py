@@ -78,88 +78,7 @@ def output(text,name, colour):
     now=datetime.now().strftime('%H:%M:%S:%f')
     print(colored("["+str(now)+"] ["+name+"] "+str(text),colour))
 
-def send_webhook(cart,url,clss, link):
-    try:
-        try:
-            checkout_speed=str(clss.finish-clss.start)
-        except:
-            checkout_speed="Unknown"
-        try:
-            img="https://d2f5l340292seg.cloudfront.net/catalog/product/cache/1/thumbnail/150x/"+find_code(cart,"https://d2f5l340292seg.cloudfront.net/catalog/product/cache/1/thumbnail/150x/",120).split("\"")[0]
-        except:
-            img="https://cdn.cybersole.io/media/discord-logo.png"
-        try:
-            title=find_code(cart,"<h1>", 50).split("<")[0]
-        except:
-            title="Unknown"
-        try:
-            price=find_code(cart,"Price\":",10).split(",")[0]
-        except:
-            price="Unknown"
-        data={
-            "embeds": [
-            {
-            "author": {
-            "name": "",
-            "url": "",
-            "icon_url": ""
-            },  
-            "title": "Click to pay",
-            "description": "**"+title+"**",
-            "timestamp":datetime.now().isoformat(),
-            "url": url,
-            "thumbnail":{"url":img},
-            "color": "2303786",
-            "footer":{"text":"Clarencs E-Shopper", "icon_url":""},
-            "fields": [
-                {
-                "name":"Size",
-                "value":clss.size,
-                "inline":"true"
-                },
-                {
-                "name":"Price",
-                "value":price,
-                "inline":"true"
-                },
-                {
-                "name":"Card",
-                "value":"||"+str(clss.cardNumber[15:19])+"||",
-                "inline":"true"
-                },
-                {
-                "name":"Task",
-                "value":clss.name,
-                "inline":"true"
-                },
-                {
-                "name":"Proxy",
-                "value":"||"+str(clss.data["proxy"])+"||",
-                "inline":"true"
-                },
-                {
-                "name":"Speed",
-                "value":checkout_speed,
-                "inline":"true"
-                },
-                {
-                "name":"Item",
-                "value":clss.url,
-                "inline":"false"
-                }
-            ],
-            }
-        ]
-        }
-        if not link:
-            data["embeds"][0]["title"]="Checkout Successful "+str(clss.cardNumber[15:19])
-        res=requests.post(clss.webhook, data=json.dumps(data), headers={"Content-Type": "application/json"})
-        if str(res.status_code)=="204":
-            return True
-        else:
-            return False
-    except:
-        return False
+
 def dsm_monitor(proxies):
     while True:
         try:
@@ -264,62 +183,62 @@ class dsm:
         return False
     def atc(self, url, delay):
         while True:
-            #try:
-            self.url=url
-            self.start=datetime.now()
-            res=self.sesh.get(url, headers=headers, proxies=self.proxy)
-            output(str(res.status_code),self.name,"cyan")
-            self.cart=res.text
-            longposturl=find_code(res.text, "<form action=\"", 250)
-            posturl=longposturl.split("\"")[0]
-            pid=str(posturl.split("/")[9])
             try:
-                longsizelist=res.text.split("<input type=\"hidden\" name=\"sa")
-                longsizelist.pop(0)
-                longsizelist=[x[0:26] for x in longsizelist]
-                sizelist=[x[0:13] for x in longsizelist]
-                vallist=[x[22:25] for x in longsizelist]
-                data={
-                    "product": pid,
-                    "related_product": "",
-                    "is_multi_order": "1",
-                }
-                for i in range(len(sizelist)):
-                    data["qtys"+sizelist[i][0:8]]="0"
-                    data["sa"+sizelist[i]]=vallist[i]
-                data["qtys"+sizelist[int(self.size)-1][0:8]]="1"
-            except:
-                data={
-                    "product": pid,
-                    "related_product": "",
-                    "qty": "1"
-                }
-            data["product"] = "275392"
-            print(data)
-            res=self.sesh.post(posturl,data=data, headers=headers, proxies=self.proxy, allow_redirects=False)
-            output(str(res.status_code),self.name,"cyan")
-            print(res.text)
-            if dict(res.headers)['Location'] == "https://shop.doverstreetmarket.com"+self.sitereg+"/checkout/cart/" and str(res.status_code) == "302":
-                output("In cart"+str(res.status_code),self.name,"cyan")
+                self.url=url
+                self.start=datetime.now()
+                res=self.sesh.get(url, headers=headers, proxies=self.proxy)
+                output(str(res.status_code),self.name,"cyan")
+                self.cart=res.text
+                longposturl=find_code(res.text, "<form action=\"", 250)
+                posturl=longposturl.split("\"")[0]
+                pid=str(posturl.split("/")[9])
+                try:
+                    longsizelist=res.text.split("<input type=\"hidden\" name=\"sa")
+                    longsizelist.pop(0)
+                    longsizelist=[x[0:26] for x in longsizelist]
+                    sizelist=[x[0:13] for x in longsizelist]
+                    vallist=[x[22:25] for x in longsizelist]
+                    data={
+                        "product": pid,
+                        "related_product": "",
+                        "is_multi_order": "1",
+                    }
+                    for i in range(len(sizelist)):
+                        data["qtys"+sizelist[i][0:8]]="0"
+                        data["sa"+sizelist[i]]=vallist[i]
+                    data["qtys"+sizelist[int(self.size)-1][0:8]]="1"
+                except:
+                    data={
+                        "product": pid,
+                        "related_product": "",
+                        "qty": "1"
+                    }
+                data["product"] = "275392"
+                print(data)
+                res=self.sesh.post(posturl,data=data, headers=headers, proxies=self.proxy, allow_redirects=False)
+                output(str(res.status_code),self.name,"cyan")
+                print(res.text)
+                if dict(res.headers)['Location'] == "https://shop.doverstreetmarket.com"+self.sitereg+"/checkout/cart/" and str(res.status_code) == "302":
+                    output("In cart"+str(res.status_code),self.name,"cyan")
+                    # try:
+                    #     if self.name == "Task 1":
+                    #         with open('temp.html', "a+") as r:
+                    #             r.write(res.text)
+                    # except:
+                    #     None
+                    return True
+                else:
+                    output("Waiting for restock of size "+str(self.size),self.name,"white")
+                    time.sleep(delay)
+            except Exception as e:
                 try:
                     if self.name == "Task 1":
                         with open('temp.html', "a+") as r:
-                            r.write(res.text)
+                            r.write(self.name+"atc error"+str(e))
                 except:
                     None
-                return True
-            else:
-                output("Waiting for restock of size "+str(self.size),self.name,"white")
+                output("Failed atc",self.name,"red")
                 time.sleep(delay)
-            # except Exception as e:
-            #     try:
-            #         if self.name == "Task 1":
-            #             with open('temp.html', "a+") as r:
-            #                 r.write(self.name+"atc error"+str(e))
-            #     except:
-            #         None
-            #     output("Failed atc",self.name,"red")
-            #     time.sleep(delay)
     
     def shipping(self):
         for i in range(3):
@@ -400,30 +319,112 @@ class dsm:
 
     def pay(self, formkey):
         for i in range(3):
-            #try:
-            output("Submitting order",self.name,"cyan")
+            try:
+                output("Submitting order",self.name,"cyan")
+                data={
+                    "payment[method]": "adyen_pay_by_link",
+                    "form_key": formkey,
+                    "agreement[1]": "1"
+                }
+                res=self.sesh.post("https://shop.doverstreetmarket.com"+self.sitereg+"/checkout/onepage/saveOrder/",data=data, headers=headers, proxies=self.proxy)
+                print(res.status_code)
+                res=self.sesh.get("https://shop.doverstreetmarket.com"+self.sitereg+"/adyen/process/redirect/", headers=headers, proxies=self.proxy)
+                print(res.text)
+                url=find_code(res.text, "action=\"", 200).split("\"")[0]
+                self.finish=datetime.now()
+                if self.send_webhook(url):
+                    output("Checkout link sent",self.name,"green")
+                    return
+                else:
+                    output(url,self.name,"green")
+                    return
+            except Exception as e:
+                try:
+                    if self.name == "Task 1":
+                        with open('temp.html', "a+") as r:
+                            r.write(self.name+"payment fail"+str(e))
+                except:
+                    None
+                output("Checkout Error", self.name,"red")
+    def send_webhook(self, url):
+        try:
+            try:
+                checkout_speed=str(self.finish-clss.start)
+            except:
+                checkout_speed="Unknown"
+            try:
+                img="https://d2f5l340292seg.cloudfront.net/catalog/product/cache/1/thumbnail/150x/"+find_code(self.cart,"https://d2f5l340292seg.cloudfront.net/catalog/product/cache/1/thumbnail/150x/",120).split("\"")[0]
+            except:
+                img="https://cdn.cybersole.io/media/discord-logo.png"
+            try:
+                title=find_code(self.cart,"<h1>", 50).split("<")[0]
+            except:
+                title="Unknown"
+            try:
+                price=find_code(self.cart,"Price\":",10).split(",")[0]
+            except:
+                price="Unknown"
             data={
-                "payment[method]": "adyen_pay_by_link",
-                "form_key": formkey,
-                "agreement[1]": "1"
+                "embeds": [
+                {
+                "author": {
+                "name": "",
+                "url": "",
+                "icon_url": ""
+                },  
+                "title": "Click to pay",
+                "description": "**"+title+"**",
+                "timestamp":datetime.now().isoformat(),
+                "url": url,
+                "thumbnail":{"url":img},
+                "color": "2303786",
+                "footer":{"text":"Clarencs E-Shopper", "icon_url":""},
+                "fields": [
+                    {
+                    "name":"Size",
+                    "value":self.size,
+                    "inline":"true"
+                    },
+                    {
+                    "name":"Price",
+                    "value":price,
+                    "inline":"true"
+                    },
+                    {
+                    "name":"Card",
+                    "value":"||"+str(self.cardName)+"||",
+                    "inline":"true"
+                    },
+                    {
+                    "name":"Task",
+                    "value":self.name,
+                    "inline":"true"
+                    },
+                    {
+                    "name":"Proxy",
+                    "value":"||"+str(self.data["proxy"])+"||",
+                    "inline":"true"
+                    },
+                    {
+                    "name":"Speed",
+                    "value":checkout_speed,
+                    "inline":"true"
+                    },
+                    {
+                    "name":"Item",
+                    "value":self.url,
+                    "inline":"false"
+                    }
+                ],
+                }
+            ]
             }
-            res=self.sesh.post("https://shop.doverstreetmarket.com"+self.sitereg+"/checkout/onepage/saveOrder/",data=data, headers=headers, proxies=self.proxy)
-            print(res.status_code)
-            res=self.sesh.get("https://shop.doverstreetmarket.com"+self.sitereg+"/adyen/process/redirect/", headers=headers, proxies=self.proxy)
-            print(res.text)
-            url=find_code(res.text, "action=\"", 200).split("\"")[0]
-            self.finish=datetime.now()
-            if send_webhook(self.cart,url,self,True):
-                output("Checkout link sent",self.name,"green")
-                return
+            if not link:
+                data["embeds"][0]["title"]="Checkout Successful "+str(self.cardName)
+            res=requests.post(self.webhook, data=json.dumps(data), headers={"Content-Type": "application/json"})
+            if str(res.status_code)=="204":
+                return True
             else:
-                output(url,self.name,"green")
-                return
-            # except Exception as e:
-            #     try:
-            #         if self.name == "Task 1":
-            #             with open('temp.html', "a+") as r:
-            #                 r.write(self.name+"payment fail"+str(e))
-            #     except:
-            #         None
-            #     output("Checkout Error", self.name,"red")
+                return False
+        except:
+            return False
