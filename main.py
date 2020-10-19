@@ -76,7 +76,7 @@ if option=="1" or option=="2":
     delay=input("Enter to start: ")
     url=dsm_monitor(proxies)
     threads=[]
-    stagger_delay='%.2f'%(delay/len(tasks))
+    stagger_delay='%.2f'%(float(delay)/len(tasks))
     for i in tasks:
         x = threading.Thread(target=dsm_go, args=(i,delay))
         x.start()
