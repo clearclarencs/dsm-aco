@@ -213,12 +213,9 @@ class dsm:
                         "related_product": "",
                         "qty": "1"
                     }
-                data["product"] = "275392"
-                print(data)
                 res=self.sesh.post(posturl,data=data, headers=headers, proxies=self.proxy, allow_redirects=False)
                 output(str(res.status_code),self.name,"cyan")
-                print(res.text)
-                if dict(res.headers)['Location'] == "https://shop.doverstreetmarket.com"+self.sitereg+"/checkout/cart/" and str(res.status_code) == "302":
+                if dict(res.headers)['Location'] == "https://shop.doverstreetmarket.com/checkout/cart/" and str(res.status_code) == "302":
                     output("In cart"+str(res.status_code),self.name,"cyan")
                     # try:
                     #     if self.name == "Task 1":
@@ -329,7 +326,6 @@ class dsm:
                 res=self.sesh.post("https://shop.doverstreetmarket.com"+self.sitereg+"/checkout/onepage/saveOrder/",data=data, headers=headers, proxies=self.proxy)
                 print(res.status_code)
                 res=self.sesh.get("https://shop.doverstreetmarket.com"+self.sitereg+"/adyen/process/redirect/", headers=headers, proxies=self.proxy)
-                print(res.text)
                 url=find_code(res.text, "action=\"", 200).split("\"")[0]
                 self.finish=datetime.now()
                 if self.send_webhook(url):
@@ -419,8 +415,6 @@ class dsm:
                 }
             ]
             }
-            if not link:
-                data["embeds"][0]["title"]="Checkout Successful "+str(self.cardName)
             res=requests.post(self.webhook, data=json.dumps(data), headers={"Content-Type": "application/json"})
             if str(res.status_code)=="204":
                 return True
@@ -428,3 +422,17 @@ class dsm:
                 return False
         except:
             return False
+    
+    def go(self, url):
+        while True:
+            if self.atc(url, 5):
+                break
+            else:
+                time.sleep(2)
+        while True:
+            formkey=self.shipping()
+            if len(str(formkey))==16:
+                break
+            else:
+                time.sleep(2)
+        self.pay(formkey)
